@@ -1,24 +1,50 @@
 import localforage from 'localforage';
 
-// Konfigurasi penyimpanan lokal
-const storage = localforage.createInstance({
-  name: "manajemen-toko",
-  storeName: "toko_data"
-});
+class Penyimpanan {
+  private static instance: localforage.LocalForage;
 
-// Fungsi CRUD dasar
-export const saveData = async (key: string, data: any) => {
-  await storage.setItem(key, data);
-};
+  static async init(): Promise<void> {
+    this.instance = localforage.createInstance({
+      name: 'manajemen-toko',
+      storeName: 'data_aplikasi',
+      driver: [
+        localforage.INDEXEDDB,
+        localforage.LOCALSTORAGE,
+        localforage.WEBSQL
+      ]
+    });
+    await this.instance.ready();
+  }
 
-export const getData = async (key: string) => {
-  return await storage.getItem(key);
-};
+  static async ambil<T>(kunci: string): Promise<T | null> {
+    try {
+      return await this.instance.getItem<T>(kunci);
+    } catch (error) {
+      console.error(`Gagal mengambil ${kunci}:`, error);
+      return null;
+    }
+  }
 
-export const removeData = async (key: string) => {
-  await storage.removeItem(key);
-};
+  static async simpan<T>(kunci: string, nilai: T): Promise<boolean> {
+    try {
+      await this.instance.setItem(kunci, nilai);
+      return true;
+    } catch (error) {
+      console.error(`Gagal menyimpan ${kunci}:`, error);
+      return false;
+    }
+  }
 
-export const clearAll = async () => {
-  await storage.clear();
-};
+  static async hapus(kunci: string): Promise<void> {
+    await this.instance.removeItem(kunci);
+  }
+
+  static async bersihkan(): Promise<void> {
+    await this.instance.clear();
+  }
+}
+
+// Inisialisasi saat pertama kali diimpor
+Penyimpanan.init();
+
+export const Storage = Penyimpanan;
