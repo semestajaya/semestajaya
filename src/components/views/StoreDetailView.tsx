@@ -1,6 +1,9 @@
 
 
 
+
+
+
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { Store, Asset, OpnameSession, Item } from '../../types/data';
 import { styles } from '../../styles';
@@ -44,17 +47,37 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({ store, onStore
         const sheetDataMap = {
             items: {
                 name: "Barang",
-                data: store.items.map(item => ({
-                    'SKU': item.sku, 'Nama Barang': item.name, 'Keterangan': item.description,
-                    'Kategori': store.itemCategories.find(c => c.id === item.categoryId)?.name ?? '',
-                    'Satuan Beli': store.units.find(u => u.id === item.purchaseUnitId)?.name ?? '',
-                    'Isi Konversi': item.conversionRate > 1 ? item.conversionRate : '',
-                    'Satuan Jual': store.units.find(u => u.id === item.sellingUnitId)?.name ?? '',
-                    'Stok Tercatat (Satuan Jual)': store.inventory.find(inv => inv.itemId === item.id)?.recordedStock ?? 0,
-                    'Harga Beli (Satuan Beli)': item.conversionRate > 1 ? item.purchasePrice * item.conversionRate : item.purchasePrice,
-                    'Harga Beli (Satuan Jual)': item.purchasePrice,
-                    'Harga Jual': item.sellingPrice
-                }))
+                data: store.items.map(item => {
+                    const inventory = store.inventory.find(inv => inv.itemId === item.id);
+                    const recordedStock = inventory?.recordedStock ?? 0;
+                    const conversionRate = item.conversionRate > 0 ? item.conversionRate : 1;
+                    
+                    const stockInPurchaseUnits = Math.floor(recordedStock / conversionRate);
+                    const stockInSellingUnitsRemainder = recordedStock % conversionRate;
+                    
+                    const purchaseUnitName = store.units.find(u => u.id === item.purchaseUnitId)?.name ?? '';
+                    const sellingUnitName = store.units.find(u => u.id === item.sellingUnitId)?.name ?? '';
+                    
+                    const isiKonversiText = item.purchaseUnitId !== item.sellingUnitId && item.conversionRate > 1
+                        ? `${item.conversionRate} ${sellingUnitName} / ${purchaseUnitName}`
+                        : '-';
+
+                    return {
+                        'SKU': item.sku,
+                        'Nama Barang': item.name,
+                        'Keterangan': item.description,
+                        'Kategori': store.itemCategories.find(c => c.id === item.categoryId)?.name ?? '',
+                        'Satuan Pembelian': purchaseUnitName,
+                        'Harga Beli per Satuan Pembelian': item.purchasePrice * conversionRate,
+                        'Konversi': isiKonversiText,
+                        'Satuan Penjualan': sellingUnitName,
+                        'Harga Beli per Satuan Penjualan': item.purchasePrice,
+                        'Harga Jual per Satuan Penjualan': item.sellingPrice,
+                        'Stok (Satuan Pembelian)': stockInPurchaseUnits,
+                        'Stok Sisa (Satuan Penjualan)': stockInSellingUnitsRemainder,
+                        'Total Stok (dlm Satuan Penjualan)': recordedStock,
+                    };
+                })
             },
             assets: {
                 name: "Aset",
@@ -128,28 +151,64 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({ store, onStore
                         jsonData.forEach(row => {
                             let category = targetStore.itemCategories.find((c: any) => c.name.toLowerCase() === (row['Kategori'] || '').toLowerCase()); if (!category && row['Kategori']) { const prefix = row['Kategori'].substring(0,3).toUpperCase(); category = { id: generateId('IC'), name: row['Kategori'], prefix }; targetStore.itemCategories.push(category); }
 
-                            const purchaseUnitName = row['Satuan Beli'] || '';
-                            const sellingUnitName = row['Satuan Jual'] || '';
+                            const purchaseUnitName = row['Satuan Beli'] || row['Satuan Pembelian'] || '';
+                            const sellingUnitName = row['Satuan Jual'] || row['Satuan Penjualan'] || '';
                             let purchaseUnit = targetStore.units.find((u: any) => u.name.toLowerCase() === purchaseUnitName.toLowerCase()); if (!purchaseUnit && purchaseUnitName) { purchaseUnit = { id: generateId('U'), name: purchaseUnitName }; targetStore.units.push(purchaseUnit); }
                             let sellingUnit = targetStore.units.find((u: any) => u.name.toLowerCase() === sellingUnitName.toLowerCase()); if (!sellingUnit && sellingUnitName) { sellingUnit = { id: generateId('U'), name: sellingUnitName }; targetStore.units.push(sellingUnit); }
                             if (!purchaseUnit) purchaseUnit = sellingUnit;
                             if (!sellingUnit) sellingUnit = purchaseUnit;
+                            
+                            const conversionText = String(row['Isi Konversi'] || row['Konversi'] || '1');
+                            const conversionRate = parseInt(conversionText) || 1;
 
-                            const conversionRate = parseInt(row['Isi Konversi']) || 1;
-                            const purchasePricePerPurchaseUnit = parseFloat(row['Harga Beli (Satuan Beli)']) || 0;
-                            const purchasePricePerSellingUnitFromSheet = parseFloat(row['Harga Beli (Satuan Jual)']) || 0;
+                            const purchasePricePerPurchaseUnit = parseFloat(String(row['Harga Beli (Satuan Beli)'] ?? row['Harga Beli per Satuan Beli'] ?? row['Harga Beli per Satuan Pembelian'] ?? null)) || 0;
+                            const purchasePricePerSellingUnitFromSheet = parseFloat(String(row['Harga Beli (Satuan Jual)'] ?? row['Harga Beli per Satuan Jual'] ?? row['Harga Beli per Satuan Penjualan'] ?? null)) || 0;
+                            
                             let finalPurchasePricePerSellingUnit = 0;
                             if (purchasePricePerSellingUnitFromSheet > 0) { finalPurchasePricePerSellingUnit = purchasePricePerSellingUnitFromSheet; }
                             else if (purchasePricePerPurchaseUnit > 0 && conversionRate > 0) { finalPurchasePricePerSellingUnit = purchasePricePerPurchaseUnit / conversionRate; }
+                            
+                            const sellingPrice = parseFloat(String(row['Harga Jual'] ?? row['Harga Jual per Satuan Penjualan'] ?? null)) || 0;
+
+                            let finalStockValue = NaN;
+                            const stockPurchaseUnit = row['Stok (Satuan Beli)'] ?? row['Stok (Satuan Pembelian)'];
+                            const stockSellingUnit = row['Sisa Stok (Satuan Jual)'] ?? row['Stok Sisa (Satuan Penjualan)'];
+                            const totalStockFromNewCol = row['Total Stok (dalam Satuan Jual)'] ?? row['Total Stok (dlm Satuan Penjualan)'];
+                            const totalStockFromOldCol = row['Stok Tercatat (Satuan Jual)'];
+
+                            if (totalStockFromNewCol !== undefined && totalStockFromNewCol !== null && String(totalStockFromNewCol).trim() !== '') {
+                                finalStockValue = parseInt(String(totalStockFromNewCol), 10);
+                            } else if ((stockPurchaseUnit !== undefined && stockPurchaseUnit !== null && String(stockPurchaseUnit).trim() !== '') || (stockSellingUnit !== undefined && stockSellingUnit !== null && String(stockSellingUnit).trim() !== '')) {
+                                const pVal = parseInt(String(stockPurchaseUnit) || '0', 10);
+                                const sVal = parseInt(String(stockSellingUnit) || '0', 10);
+                                finalStockValue = (pVal * conversionRate) + sVal;
+                            } else if (totalStockFromOldCol !== undefined && totalStockFromOldCol !== null && String(totalStockFromOldCol).trim() !== '') {
+                                finalStockValue = parseInt(String(totalStockFromOldCol), 10);
+                            }
 
                             const existingItemIndex = targetStore.items.findIndex((i: any) => i.sku === row['SKU']);
                             const itemData: Omit<Item, 'id' | 'sku'> = {
                                 name: row['Nama Barang'], description: row['Keterangan'] || '', categoryId: category?.id,
                                 sellingUnitId: sellingUnit?.id, purchaseUnitId: purchaseUnit?.id, conversionRate: conversionRate,
-                                purchasePrice: finalPurchasePricePerSellingUnit, sellingPrice: parseFloat(row['Harga Jual']) || 0,
+                                purchasePrice: finalPurchasePricePerSellingUnit, sellingPrice: sellingPrice,
                             };
-                            if (existingItemIndex > -1) { const existingItem = targetStore.items[existingItemIndex]; targetStore.items[existingItemIndex] = { ...existingItem, ...itemData }; const invIndex = targetStore.inventory.findIndex((inv: any) => inv.itemId === existingItem.id); if (invIndex > -1) targetStore.inventory[invIndex].recordedStock = parseInt(row['Stok Tercatat (Satuan Jual)']) || targetStore.inventory[invIndex].recordedStock; updated++; } 
-                            else { const newItem = { ...itemData, id: generateId(`${store.id}-ITM`), sku: row['SKU'] || `${category?.prefix || 'BRG'}-${String(targetStore.items.length + 1).padStart(3, '0')}` }; targetStore.items.push(newItem); targetStore.inventory.push({ itemId: newItem.id, recordedStock: parseInt(row['Stok Tercatat (Satuan Jual)']) || 0 }); added++; }
+                            if (existingItemIndex > -1) { 
+                                const existingItem = targetStore.items[existingItemIndex]; 
+                                targetStore.items[existingItemIndex] = { ...existingItem, ...itemData }; 
+                                const invIndex = targetStore.inventory.findIndex((inv: any) => inv.itemId === existingItem.id); 
+                                if (invIndex > -1) {
+                                    targetStore.inventory[invIndex].recordedStock = !isNaN(finalStockValue) ? finalStockValue : targetStore.inventory[invIndex].recordedStock;
+                                } else if (!isNaN(finalStockValue)) {
+                                    targetStore.inventory.push({ itemId: existingItem.id, recordedStock: finalStockValue });
+                                }
+                                updated++; 
+                            } 
+                            else { 
+                                const newItem = { ...itemData, id: generateId(`${store.id}-ITM`), sku: row['SKU'] || `${category?.prefix || 'BRG'}-${String(targetStore.items.length + 1).padStart(3, '0')}` }; 
+                                targetStore.items.push(newItem); 
+                                targetStore.inventory.push({ itemId: newItem.id, recordedStock: !isNaN(finalStockValue) ? finalStockValue : 0 }); 
+                                added++; 
+                            }
                         });
                     } else if(sheetName.toLowerCase().includes('aset')) {
                          jsonData.forEach(row => {
