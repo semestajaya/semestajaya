@@ -1,1 +1,17 @@
-// This file is obsolete and has been replaced by the structured application in the /src directory. Its content has been moved to the appropriate files under /src.
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { App } from './src/App';
+import './src/styles.css';
+
+// This is the main entry point for the application.
+const rootElement = document.getElementById('root');
+if (rootElement) {
+    const root = createRoot(rootElement);
+    root.render(
+        <React.StrictMode>
+            <App />
+        </React.StrictMode>
+    );
+} else {
+    console.error("Fatal Error: Root element with id 'root' was not found in the DOM.");
+}

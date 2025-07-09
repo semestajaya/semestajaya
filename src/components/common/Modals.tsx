@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { styles } from '../../styles';
 
-export const Modal = ({ isOpen, onClose, title, children }) => {
+type ModalProps = { isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode; };
+export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
     if (!isOpen) return null;
     return (
         <div style={styles.modalOverlay} onClick={onClose}>
@@ -16,8 +16,8 @@ export const Modal = ({ isOpen, onClose, title, children }) => {
         </div>
     );
 };
-
-export const ConfirmModal = ({ isOpen, onClose, onConfirm, title, children, confirmText = 'Hapus', confirmButtonStyle = styles.buttonDanger }) => {
+type ConfirmModalProps = { isOpen: boolean; onClose: () => void; onConfirm: () => void; title: string; children: React.ReactNode; confirmText?: string; confirmButtonStyle?: React.CSSProperties; };
+export const ConfirmModal = ({ isOpen, onClose, onConfirm, title, children, confirmText = 'Hapus', confirmButtonStyle = styles.buttonDanger }: ConfirmModalProps) => {
     if (!isOpen) return null;
     return (
         <div style={styles.modalOverlay} onClick={onClose}>
@@ -35,8 +35,8 @@ export const ConfirmModal = ({ isOpen, onClose, onConfirm, title, children, conf
         </div>
     );
 };
-
-export const InfoModal = ({ isOpen, onClose, title, children }) => {
+type InfoModalProps = { isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode; };
+export const InfoModal = ({ isOpen, onClose, title, children }: InfoModalProps) => {
     if (!isOpen) return null;
      return (
         <div style={styles.modalOverlay} onClick={onClose}>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export const styles: { [key: string]: React.CSSProperties } = {
@@ -38,4 +37,7 @@ export const styles: { [key: string]: React.CSSProperties } = {
     modalTitle: { margin: 0, fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' },
     modalCloseButton: { background: 'none', border: 'none', fontSize: '1.75rem', cursor: 'pointer', color: 'var(--text-secondary)' },
     modalFooter: { marginTop: '32px', display: 'flex', justifyContent: 'flex-end', gap: '12px' },
+    searchInputWrapper: { position: 'relative', width: '100%', maxWidth: '400px' },
+    searchInput: { width: 'calc(100% - 48px)', padding: '10px 16px 10px 40px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontSize: '0.95rem' },
+    searchInputIcon: { position: 'absolute', top: '50%', left: '12px', transform: 'translateY(-50%)', pointerEvents: 'none' },
 };

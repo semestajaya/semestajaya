@@ -1,4 +1,3 @@
-
 export interface ItemCategory { id: string; name: string; prefix: string; }
 export interface Unit { id: string; name: string; }
 export interface AssetCategory { id: string; name: string; prefix: string; }
@@ -8,9 +7,11 @@ export interface Item {
   name: string;
   sku: string;
   categoryId: string;
-  unitId: string;
-  purchasePrice: number;
-  sellingPrice: number;
+  sellingUnitId: string; // The primary unit for stock and selling price
+  purchaseUnitId: string; // The unit for bulk purchases
+  conversionRate: number; // How many selling units per purchase unit
+  purchasePrice: number; // Price per SELLING unit (calculated)
+  sellingPrice: number; // Price per SELLING unit
   description: string;
 }
 
