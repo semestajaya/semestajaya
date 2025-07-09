@@ -1,5 +1,4 @@
 
-
 import ExcelJS from 'exceljs';
 
 /**
@@ -68,21 +67,19 @@ export const createAndDownloadExcel = async (sheetRequests: SheetRequest[], file
       // Auto-fit columns based on content
       worksheet.columns.forEach(column => {
           let maxLength = 0;
-          const header = column.header; // header is string | string[] | undefined
+          const header = column.header; 
+          
           if (header) {
-              // Safely handle string or string array for header
               const headerText = Array.isArray(header) ? header.join(', ') : String(header);
               maxLength = headerText.length;
           }
           
-          // Check data length for this column
           column.eachCell!({ includeEmpty: true }, cell => {
               const columnLength = cell.value ? cell.value.toString().length : 10;
               if (columnLength > maxLength) {
                   maxLength = columnLength;
               }
           });
-          // Set width with padding and a max cap
           column.width = maxLength < 50 ? maxLength + 2 : 50;
       });
 

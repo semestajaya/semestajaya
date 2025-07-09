@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, useRef } from 'react';
 import { styles } from '../../styles';
 import { ConfirmModal, InfoModal } from '../common/Modals';
