@@ -149,6 +149,9 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({ store, onStore
 
                     if(sheetName.toLowerCase().includes('barang')) {
                         jsonData.forEach(row => {
+                            const itemNameFromRow = (row['Nama Barang'] || '').trim();
+                            if (!itemNameFromRow) return;
+
                             let category = targetStore.itemCategories.find((c: any) => c.name.toLowerCase() === (row['Kategori'] || '').toLowerCase()); if (!category && row['Kategori']) { const prefix = row['Kategori'].substring(0,3).toUpperCase(); category = { id: generateId('IC'), name: row['Kategori'], prefix }; targetStore.itemCategories.push(category); }
 
                             const purchaseUnitName = row['Satuan Beli'] || row['Satuan Pembelian'] || '';
@@ -186,12 +189,18 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({ store, onStore
                                 finalStockValue = parseInt(String(totalStockFromOldCol), 10);
                             }
 
-                            const existingItemIndex = targetStore.items.findIndex((i: any) => i.sku === row['SKU']);
+                            const existingItemIndex = targetStore.items.findIndex((i: Item) => i.name.trim().toLowerCase() === itemNameFromRow.toLowerCase());
                             const itemData: Omit<Item, 'id' | 'sku'> = {
-                                name: row['Nama Barang'], description: row['Keterangan'] || '', categoryId: category?.id,
-                                sellingUnitId: sellingUnit?.id, purchaseUnitId: purchaseUnit?.id, conversionRate: conversionRate,
-                                purchasePrice: finalPurchasePricePerSellingUnit, sellingPrice: sellingPrice,
+                                name: itemNameFromRow,
+                                description: row['Keterangan'] || '',
+                                categoryId: category?.id,
+                                sellingUnitId: sellingUnit?.id,
+                                purchaseUnitId: purchaseUnit?.id,
+                                conversionRate: conversionRate,
+                                purchasePrice: finalPurchasePricePerSellingUnit,
+                                sellingPrice: sellingPrice,
                             };
+                            
                             if (existingItemIndex > -1) { 
                                 const existingItem = targetStore.items[existingItemIndex]; 
                                 targetStore.items[existingItemIndex] = { ...existingItem, ...itemData }; 
@@ -204,7 +213,8 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({ store, onStore
                                 updated++; 
                             } 
                             else { 
-                                const newItem = { ...itemData, id: generateId(`${store.id}-ITM`), sku: row['SKU'] || `${category?.prefix || 'BRG'}-${String(targetStore.items.length + 1).padStart(3, '0')}` }; 
+                                const newSku = row['SKU'] || `${category?.prefix || 'BRG'}-${String(targetStore.items.length + 1).padStart(3, '0')}`;
+                                const newItem = { ...itemData, id: generateId(`${store.id}-ITM`), sku: newSku }; 
                                 targetStore.items.push(newItem); 
                                 targetStore.inventory.push({ itemId: newItem.id, recordedStock: !isNaN(finalStockValue) ? finalStockValue : 0 }); 
                                 added++; 
