@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { styles } from '../../styles';
 import { ConfirmModal, InfoModal } from '../common/Modals';
@@ -17,7 +18,7 @@ interface MasterDataViewProps {
 }
 
 export const MasterDataView: React.FC<MasterDataViewProps> = ({ title, data, columns, onSave, onDelete, formInputs, emptyForm, usageCheck, itemType }) => {
-    const [editingItem, setEditingItem] = useState(null);
+    const [editingItem, setEditingItem] = useState<any | null>(null);
     const [isAdding, setIsAdding] = useState(false);
     const [formData, setFormData] = useState(emptyForm);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);

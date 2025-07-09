@@ -1,6 +1,5 @@
 
-
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Store, OpnameSession } from './types/data';
 import { styles } from './styles';
 import { HomePage } from './components/views/HomePage';
