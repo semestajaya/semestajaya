@@ -270,14 +270,14 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
             <div ref={formRef} style={styles.card}>
                 <h3 style={{marginTop: 0, marginBottom: '20px', fontSize: '1.25rem'}}>{editingItem ? 'Edit Barang' : 'Tambah Barang Baru'}</h3>
                 <form onSubmit={handleSave}>
-                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '16px'}}>
+                    <div style={{display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '16px'}} className="responsive-form-grid">
                         
                         {/* Row 1: Nama & Kategori */}
-                        <div style={{gridColumn: 'span 8'}} className="responsive-form-grid">
+                        <div style={{gridColumn: 'span 8'}}>
                             <label htmlFor="item-name" style={styles.formLabel}>Nama *</label>
                             <input id="item-name" ref={firstInputRef} style={styles.input} type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required />
                         </div>
-                        <div style={{gridColumn: 'span 4'}} className="responsive-form-grid">
+                        <div style={{gridColumn: 'span 4'}}>
                             <div style={{...styles.inlineFlex, justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px'}}>
                                 <label htmlFor="item-category" style={{...styles.formLabel, marginBottom: 0}}>Kategori *</label>
                                 <button type="button" onClick={() => setIsCategoryModalOpen(true)} style={{ ...styles.button, ...styles.buttonOutline, ...styles.buttonIconSmall}} title="Tambah Kategori Baru">
@@ -291,7 +291,7 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                         </div>
 
                         {/* Row 2: Satuan, Stok & Konversi - REBUILT LAYOUT */}
-                        <div style={{gridColumn: 'span 3'}} className="responsive-form-grid">
+                        <div style={{gridColumn: 'span 3'}}>
                              <div style={{...styles.inlineFlex, justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px'}}>
                                 <label htmlFor="item-purchase-unit" style={{...styles.formLabel, marginBottom: 0}}>Satuan Beli *</label>
                                 <button type="button" onClick={() => setIsUnitModalOpen(true)} style={{ ...styles.button, ...styles.buttonOutline, ...styles.buttonIconSmall}} title="Tambah Satuan Baru">
@@ -303,28 +303,28 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                                 {store.units.map(u=><option key={u.id} value={u.id}>{u.name}</option>)}
                             </select>
                         </div>
-                        <div style={{gridColumn: 'span 2'}} className="responsive-form-grid">
+                        <div style={{gridColumn: 'span 2'}}>
                            <label htmlFor="item-stock-purchase-unit" style={styles.formLabel}>Jumlah Stok</label>
                            <input id="item-stock-purchase-unit" aria-label="Jumlah stok dalam satuan beli" style={styles.input} type="number" min="0" value={formData.stockPurchaseUnitQty} onChange={e => setFormData({...formData, stockPurchaseUnitQty: e.target.value})} />
                         </div>
-                        <div style={{gridColumn: 'span 2'}} className="responsive-form-grid">
+                        <div style={{gridColumn: 'span 2'}}>
                             <label htmlFor="item-conversion" style={styles.formLabel}>Isi</label>
                             <input id="item-conversion" style={styles.input} type="number" value={formData.conversionRate} onChange={e => setFormData({ ...formData, conversionRate: e.target.value })} min="1" />
                         </div>
-                         <div style={{gridColumn: 'span 3'}} className="responsive-form-grid">
+                         <div style={{gridColumn: 'span 3'}}>
                             <label htmlFor="item-selling-unit" style={styles.formLabel}>Satuan Jual *</label>
                              <select id="item-selling-unit" style={styles.select} value={formData.sellingUnitId} onChange={e => setFormData({ ...formData, sellingUnitId: e.target.value })} required>
                                 <option value="" disabled>Pilih Satuan</option>
                                 {store.units.map(u=><option key={u.id} value={u.id}>{u.name}</option>)}
                              </select>
                         </div>
-                         <div style={{gridColumn: 'span 2'}} className="responsive-form-grid">
+                         <div style={{gridColumn: 'span 2'}}>
                            <label htmlFor="item-stock-selling-unit" style={styles.formLabel}>Jumlah Sisa</label>
                            <input id="item-stock-selling-unit" aria-label="Jumlah sisa stok dalam satuan jual" style={styles.input} type="number" min="0" value={formData.stockSellingUnitQty} onChange={e => setFormData({...formData, stockSellingUnitQty: e.target.value})} />
                         </div>
                         
                         {/* Row 3: Harga Beli */}
-                        <div style={{gridColumn: 'span 6'}} className="responsive-form-grid">
+                        <div style={{gridColumn: 'span 6'}}>
                             <label htmlFor="item-purchase-price-pu" style={styles.formLabel}>Total Harga Beli (untuk Jumlah Stok di atas)</label>
                             <input
                                 id="item-purchase-price-pu"
@@ -335,13 +335,13 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                                 onChange={e => setFormData({ ...formData, totalPurchasePrice: parseNumberWithDots(e.target.value) })}
                             />
                         </div>
-                        <div style={{gridColumn: 'span 6'}} className="responsive-form-grid">
+                        <div style={{gridColumn: 'span 6'}}>
                             <label htmlFor="item-purchase-price-su" style={styles.formLabel}>Harga Beli / Satuan Jual</label>
                             <input id="item-purchase-price-su" style={{...styles.input, backgroundColor: '#f9fafb'}} type="text" value={formatCurrency(purchasePricePerSellingUnit)} readOnly />
                         </div>
 
                         {/* Row 4: Harga Jual & Keterangan (Re-arranged) */}
-                        <div style={{gridColumn: 'span 6'}} className="responsive-form-grid">
+                        <div style={{gridColumn: 'span 6'}}>
                             <label htmlFor="item-selling-price" style={styles.formLabel}>Harga Jual / Satuan Jual</label>
                             <input
                                 id="item-selling-price"
@@ -352,13 +352,13 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                                 onChange={e => setFormData({ ...formData, sellingPrice: parseNumberWithDots(e.target.value) })}
                             />
                         </div>
-                        <div style={{gridColumn: 'span 6'}} className="responsive-form-grid">
+                        <div style={{gridColumn: 'span 6'}}>
                             <label htmlFor="item-description" style={styles.formLabel}>Keterangan</label>
                             <textarea id="item-description" style={{...styles.input, height: '80px', resize: 'vertical'}} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
                         </div>
                     </div>
 
-                    <div style={{display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px'}} className="responsive-inline-flex">
+                    <div style={{display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px'}} className="modal-footer-style">
                         <button type="submit" style={{...styles.button, ...styles.buttonPrimary}}>{editingItem ? 'Simpan Perubahan' : 'Tambah Barang'}</button>
                         <button type="button" onClick={handleCancel} style={{ ...styles.button, ...styles.buttonOutline }}>Batal</button>
                     </div>
