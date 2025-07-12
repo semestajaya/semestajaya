@@ -8,6 +8,7 @@ import { StoreItemsView } from '../store/StoreItemsView';
 import { StoreAssetsView } from '../store/StoreAssetsView';
 import { StoreCostsView } from '../store/StoreCostsView';
 import { StoreSummaryView } from './StoreSummaryView';
+import { CashFlowView } from './CashFlowView';
 import { MoreVertIcon, PlayIcon, ImportIcon, ExportIcon } from '../common/Icons';
 import { createAndDownloadExcel, SheetRequest } from '../../utils/exportUtils';
 import ExcelJS from 'exceljs';
@@ -67,12 +68,20 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({ store, onStore
                 data: store.costs.map(c => ({
                     'Biaya': c.name, 'Keterangan': c.description, 'Jumlah': c.amount, 'Frekuensi': c.frequency
                 }))
+            },
+            cashflow: {
+                 name: "Arus Kas",
+                 data: store.cashFlow.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(cf => ({
+                    'Tanggal': cf.date, 'Jumlah': cf.amount, 'Keterangan': cf.description
+                 }))
             }
         };
 
         if (type === 'all') {
             (Object.keys(sheetDataMap) as Array<keyof typeof sheetDataMap>).forEach(key => {
-                sheetRequests.push({ sheetName: sheetDataMap[key].name, data: sheetDataMap[key].data });
+                 if (key !== 'cashflow' || (key === 'cashflow' && store.cashFlow.length > 0)) {
+                    sheetRequests.push({ sheetName: sheetDataMap[key].name, data: sheetDataMap[key].data });
+                 }
             });
             createAndDownloadExcel(sheetRequests, `${store.name}-Semua Data.xlsx`);
         } else if (activeTab !== 'summary') {
@@ -200,6 +209,7 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({ store, onStore
         items: { label: "Master Barang", component: <StoreItemsView store={store} onStoreUpdate={onStoreUpdate} /> }, 
         assets: { label: "Master Aset", component: <StoreAssetsView store={store} onStoreUpdate={onStoreUpdate} /> }, 
         costs: { label: "Master Biaya", component: <StoreCostsView store={store} onStoreUpdate={onStoreUpdate} /> }, 
+        cashflow: { label: "Arus Kas", component: <CashFlowView store={store} onStoreUpdate={onStoreUpdate} /> },
     };
 
     return <>

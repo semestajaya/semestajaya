@@ -39,6 +39,13 @@ export interface OperationalCost {
     description: string;
 }
 
+export interface CashFlowEntry {
+  id: string;
+  date: string; // YYYY-MM-DD
+  amount: number;
+  description: string;
+}
+
 export interface Store {
   id: string;
   name: string;
@@ -50,6 +57,9 @@ export interface Store {
   inventory: StoreInventory[];
   assets: Asset[];
   costs: OperationalCost[];
+  cashFlow: CashFlowEntry[];
+  capitalRecouped: number;
+  netProfit: number;
 }
 
 export interface OpnameSession {

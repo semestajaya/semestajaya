@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Store } from '../../types/data';
 import { styles } from '../../styles';
@@ -34,7 +35,7 @@ export const HomePage: React.FC<HomePageProps> = ({ stores, onSelectStore, onAdd
         setIsSaving(true);
         try {
             if (editingStore) { onUpdateStore(editingStore.id, { name: formData.name.trim(), address: formData.address.trim() || '' }); } 
-            else { const newStore: Store = { id: generateId('TKO'), name: formData.name.trim(), address: formData.address.trim() || '', items: [], inventory: [], assets: [], costs: [], itemCategories: [], units: [], assetCategories: [] }; onAddStore(newStore); }
+            else { const newStore: Store = { id: generateId('TKO'), name: formData.name.trim(), address: formData.address.trim() || '', items: [], inventory: [], assets: [], costs: [], itemCategories: [], units: [], assetCategories: [], cashFlow: [], capitalRecouped: 0, netProfit: 0 }; onAddStore(newStore); }
             handleCloseModal();
         } catch (err) { console.error("Failed to save store:", err); setError("Gagal menyimpan toko. Operasi lokal seharusnya tidak gagal."); } 
         finally { setIsSaving(false); }

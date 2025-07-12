@@ -17,13 +17,17 @@ export const App = () => {
             const saved = localStorage.getItem(APP_STORAGE_KEY_STORES);
             if (saved) {
                 const parsedStores = JSON.parse(saved);
-                // Load default data if localStorage has an empty array to ensure samples are shown.
-                if (parsedStores && parsedStores.length > 0) {
-                    return parsedStores;
+                if (Array.isArray(parsedStores) && parsedStores.length > 0) {
+                    // Ensure all stores have the new cash flow fields for backward compatibility
+                    return parsedStores.map(store => ({
+                        cashFlow: [],
+                        capitalRecouped: 0,
+                        netProfit: 0,
+                        ...store,
+                    }));
                 }
             }
-            // If nothing is saved, or if it's an empty array, load default stores.
-            return defaultStores;
+            return defaultStores; // Load default if nothing usable in localStorage
         } catch (e) {
             console.error("Failed to load stores, initializing with default data.", e);
             return defaultStores;

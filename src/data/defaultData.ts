@@ -50,6 +50,9 @@ export const defaultStores: Store[] = [
       { id: 'cost-tkb-1', name: 'Listrik', amount: 500000, frequency: 'bulanan', description: 'Tagihan PLN bulanan' },
       { id: 'cost-tkb-2', name: 'Sewa Toko', amount: 12000000, frequency: 'tahunan', description: 'Sewa ruko per tahun' },
     ],
+    cashFlow: [],
+    capitalRecouped: 0,
+    netProfit: 0,
   },
   // 2. Kedai Kopi
   {
@@ -94,6 +97,9 @@ export const defaultStores: Store[] = [
       { id: 'cost-kks-3', name: 'Gaji Barista', amount: 3500000, frequency: 'bulanan', description: 'Per orang' },
       { id: 'cost-kks-4', name: 'Internet & Wifi', amount: 400000, frequency: 'bulanan', description: 'Provider: IndiHome' },
     ],
+    cashFlow: [],
+    capitalRecouped: 0,
+    netProfit: 0,
   },
   // 3. Warung Makan
   {
@@ -135,5 +141,8 @@ export const defaultStores: Store[] = [
       { id: 'cost-wms-1', name: 'Belanja Bahan Baku', amount: 300000, frequency: 'harian', description: 'Belanja di pasar pagi' },
       { id: 'cost-wms-2', name: 'Gas LPG 3kg', amount: 25000, frequency: 'harian', description: 'Rata-rata pemakaian per hari' },
     ],
+    cashFlow: [],
+    capitalRecouped: 0,
+    netProfit: 0,
   },
 ];

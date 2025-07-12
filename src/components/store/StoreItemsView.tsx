@@ -294,10 +294,10 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                                 {store.itemCategories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
                             </select>
                         </div>
-                        {/* Satuan Beli */}
+                        {/* Qty Beli */}
                         <div>
                              <div style={{...styles.inlineFlex, justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px'}}>
-                                <label htmlFor="item-purchase-unit" style={{...styles.formLabel, marginBottom: 0}}>Satuan Beli *</label>
+                                <label htmlFor="item-purchase-unit" style={{...styles.formLabel, marginBottom: 0}}>Qty Beli *</label>
                                 <button type="button" onClick={() => setIsUnitModalOpen(true)} style={{ ...styles.button, ...styles.buttonOutline, ...styles.buttonIconSmall}} title="Tambah Satuan Baru">
                                     <PlusIcon size={16}/>
                                 </button>
@@ -308,9 +308,9 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                             </select>
                         </div>
 
-                        {/* Jumlah (Satuan Beli) */}
+                        {/* Jumlah */}
                         <div>
-                           <label htmlFor="item-stock-purchase-unit" style={styles.formLabel}>Jumlah (Satuan Beli)</label>
+                           <label htmlFor="item-stock-purchase-unit" style={styles.formLabel}>Jumlah</label>
                            <input id="item-stock-purchase-unit" aria-label="Jumlah stok dalam satuan beli" style={styles.input} type="number" min="0" value={formData.stockPurchaseUnitQty} onChange={e => setFormData({...formData, stockPurchaseUnitQty: e.target.value})} />
                         </div>
                         {/* Isi Konversi */}
@@ -319,14 +319,14 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                             <input id="item-conversion" style={styles.input} type="number" value={formData.conversionRate} onChange={e => setFormData({ ...formData, conversionRate: e.target.value })} min="1" />
                         </div>
                         
-                        {/* Sisa (Satuan Jual) */}
+                        {/* Qty Sisa */}
                         <div>
-                           <label htmlFor="item-stock-selling-unit" style={styles.formLabel}>Sisa (Satuan Jual)</label>
+                           <label htmlFor="item-stock-selling-unit" style={styles.formLabel}>Qty Sisa</label>
                            <input id="item-stock-selling-unit" aria-label="Jumlah sisa stok dalam satuan jual" style={styles.input} type="number" min="0" value={formData.stockSellingUnitQty} onChange={e => setFormData({...formData, stockSellingUnitQty: e.target.value})} />
                         </div>
-                         {/* Satuan Jual */}
+                         {/* Qty Jual */}
                          <div>
-                            <label htmlFor="item-selling-unit" style={styles.formLabel}>Satuan Jual *</label>
+                            <label htmlFor="item-selling-unit" style={styles.formLabel}>Qty Jual *</label>
                              <select id="item-selling-unit" style={styles.select} value={formData.sellingUnitId} onChange={e => setFormData({ ...formData, sellingUnitId: e.target.value })} required>
                                 <option value="" disabled>Pilih Satuan</option>
                                 {store.units.map(u=><option key={u.id} value={u.id}>{u.name}</option>)}
@@ -335,7 +335,7 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                         
                         {/* Total Harga Beli */}
                         <div>
-                            <label htmlFor="item-purchase-price-pu" style={styles.formLabel}>Total Harga Beli (utk Jml Beli)</label>
+                            <label htmlFor="item-purchase-price-pu" style={styles.formLabel}>Total Harga Beli</label>
                             <input
                                 id="item-purchase-price-pu"
                                 style={styles.input}
@@ -345,15 +345,15 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                                 onChange={e => setFormData({ ...formData, totalPurchasePrice: e.target.value })}
                             />
                         </div>
-                        {/* Hrg. Beli / Satuan Jual */}
+                        {/* Harga /Qty */}
                         <div>
-                            <label htmlFor="item-purchase-price-su" style={styles.formLabel}>Hrg. Beli/Jual (Otomatis)</label>
+                            <label htmlFor="item-purchase-price-su" style={styles.formLabel}>Harga /Qty</label>
                             <input id="item-purchase-price-su" style={{...styles.input, backgroundColor: '#f9fafb'}} type="text" value={formatCurrency(purchasePricePerSellingUnit)} readOnly />
                         </div>
 
-                        {/* Harga Jual */}
+                        {/* Harga Jual /Qty */}
                         <div>
-                            <label htmlFor="item-selling-price" style={styles.formLabel}>Harga Jual / Satuan Jual</label>
+                            <label htmlFor="item-selling-price" style={styles.formLabel}>Harga Jual /Qty</label>
                             <input
                                 id="item-selling-price"
                                 style={styles.input}
@@ -363,9 +363,9 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                                 onChange={e => setFormData({ ...formData, sellingPrice: e.target.value })}
                             />
                         </div>
-                        {/* Keterangan */}
+                        {/* Ket. */}
                         <div>
-                            <label htmlFor="item-description" style={styles.formLabel}>Keterangan</label>
+                            <label htmlFor="item-description" style={styles.formLabel}>Ket.</label>
                             <textarea id="item-description" style={{...styles.input, height: '42px', resize: 'vertical'}} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
                         </div>
                     </div>
