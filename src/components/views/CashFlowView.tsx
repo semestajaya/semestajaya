@@ -92,7 +92,12 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
         const { capitalRecouped, netProfit } = handleRecalculateCapitalAndProfit(updatedCashFlow, store);
         
         onStoreUpdate({ ...store, cashFlow: updatedCashFlow, capitalRecouped, netProfit });
-        setFormData(emptyForm);
+        
+        const lastDate = new Date(formData.date + 'T00:00:00');
+        lastDate.setDate(lastDate.getDate() + 1);
+        const nextDayString = lastDate.toISOString().split('T')[0];
+
+        setFormData({ ...emptyForm, date: nextDayString });
     };
     
     const handleDeleteIncome = () => {
