@@ -24,7 +24,14 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
     const [selectedMonth, setSelectedMonth] = useState(today.getMonth());
     const [selectedYear, setSelectedYear] = useState(today.getFullYear());
     
-    const emptyForm = { date: today.toISOString().split('T')[0], amount: '', description: '' };
+    const formatDate = (date: Date): string => {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    };
+
+    const emptyForm = { date: formatDate(today), amount: '', description: '' };
     const [formData, setFormData] = useState(emptyForm);
     const [deletingEntry, setDeletingEntry] = useState<CashFlowEntry | null>(null);
 
@@ -95,7 +102,7 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
         
         const lastDate = new Date(formData.date + 'T00:00:00');
         lastDate.setDate(lastDate.getDate() + 1);
-        const nextDayString = lastDate.toISOString().split('T')[0];
+        const nextDayString = formatDate(lastDate);
 
         setFormData({ ...emptyForm, date: nextDayString });
     };
@@ -226,7 +233,7 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
                     <tbody>
                         {filteredEntries.length > 0 ? filteredEntries.map(entry => (
                             <tr key={entry.id}>
-                                <td style={styles.td}>{new Date(entry.date).toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'})}</td>
+                                <td style={styles.td}>{new Date(entry.date + 'T00:00:00').toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'})}</td>
                                 <td style={styles.td}>{entry.description}</td>
                                 <td style={styles.td}>{formatCurrency(entry.amount)}</td>
                                 <td style={styles.td}><button onClick={() => setDeletingEntry(entry)} style={{...styles.button, ...styles.buttonDanger, ...styles.buttonIconSmall}} title="Hapus"><TrashIcon/></button></td>
