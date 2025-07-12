@@ -40,14 +40,14 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
             .filter(c => c.frequency === 'tahunan')
             .reduce((sum, c) => sum + c.amount, 0) / 12;
 
-        // Initial Capital is stock value + asset value + one-time annual costs.
-        const annualCostsForCapital = store.costs
-            .filter(c => c.frequency === 'tahunan')
+        // Initial Capital is stock value + asset value + one-time costs (annual and 'sekali').
+        const oneTimeCostsForCapital = store.costs
+            .filter(c => c.frequency === 'tahunan' || c.frequency === 'sekali')
             .reduce((sum, c) => sum + c.amount, 0);
 
         const initialStockValue = store.items.reduce((acc, item) => acc + (item.purchasePrice * (store.inventory.find(inv => inv.itemId === item.id)?.recordedStock || 0)), 0);
         const initialAssetValue = store.assets.reduce((acc, asset) => acc + asset.value, 0);
-        const initialCapital = initialStockValue + initialAssetValue + annualCostsForCapital;
+        const initialCapital = initialStockValue + initialAssetValue + oneTimeCostsForCapital;
 
         const incomeByMonth: { [key: string]: number } = {};
         sortedFlow.forEach(entry => {
@@ -124,12 +124,12 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
         }, 0);
         const totalAssetValue = store.assets.reduce((acc, asset) => acc + asset.value, 0);
 
-        // Initial capital is stock + assets + one-time annual costs.
-        const annualCostsForCapital = store.costs
-            .filter(c => c.frequency === 'tahunan')
+        // Initial capital is stock + assets + one-time costs (annual and 'sekali').
+        const oneTimeCostsForCapital = store.costs
+            .filter(c => c.frequency === 'tahunan' || c.frequency === 'sekali')
             .reduce((sum, c) => sum + c.amount, 0);
             
-        const initialCapital = totalStockValue + totalAssetValue + annualCostsForCapital;
+        const initialCapital = totalStockValue + totalAssetValue + oneTimeCostsForCapital;
         const remainingCapital = Math.max(0, initialCapital - store.capitalRecouped);
 
         return {

@@ -35,7 +35,7 @@ export interface OperationalCost {
     id: string;
     name: string;
     amount: number;
-    frequency: 'harian' | 'mingguan' | 'bulanan' | 'tahunan';
+    frequency: 'harian' | 'mingguan' | 'bulanan' | 'tahunan' | 'sekali';
     description: string;
 }
 
