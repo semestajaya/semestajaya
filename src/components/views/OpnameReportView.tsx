@@ -46,12 +46,12 @@ export const OpnameReportView: React.FC<OpnameReportViewProps> = ({ report, stor
     
     const handleExportToExcel = useCallback(() => {
         const itemsData = report.items.map(item => ({ 
-            'Nama Barang': item.itemName, 'Stok Awal': item.initialStock, 'Hitungan Fisik': item.physicalCount, 
+            'Nama': item.itemName, 'Stok Awal': item.initialStock, 'Hitungan Fisik': item.physicalCount, 
             'Selisih': item.discrepancy, 'Satuan': item.unit 
         }));
 
         const assetsData = report.assetChanges.map(change => ({ 
-            'Nama Aset': change.assetName, 'Kondisi Awal': change.oldCondition, 'Kondisi Baru': change.newCondition 
+            'Aset': change.assetName, 'Kondisi Awal': change.oldCondition, 'Kondisi Baru': change.newCondition 
         }));
 
         const sheetRequests: SheetRequest[] = [
@@ -126,7 +126,7 @@ export const OpnameReportView: React.FC<OpnameReportViewProps> = ({ report, stor
             </div>
              <div className="responsive-table-wrapper">
                  <table style={styles.table}>
-                    <thead><tr><th style={styles.th}>Nama Barang</th><th style={styles.th}>Stok Awal</th><th style={styles.th}>Hitungan Fisik</th><th style={styles.th}>Selisih</th><th style={styles.th}>Satuan</th></tr></thead>
+                    <thead><tr><th style={styles.th}>Nama</th><th style={styles.th}>Stok Awal</th><th style={styles.th}>Hitungan Fisik</th><th style={styles.th}>Selisih</th><th style={styles.th}>Satuan</th></tr></thead>
                     <tbody>{report.items.map(item => (<tr key={item.itemId}><td style={styles.td}>{item.itemName}</td><td style={styles.td}>{item.initialStock}</td><td style={styles.td}>{item.physicalCount}</td><td style={styles.td}>{renderDiscrepancy(item.discrepancy)}</td><td style={styles.td}>{item.unit}</td></tr>))}</tbody>
                 </table>
             </div>
@@ -139,7 +139,7 @@ export const OpnameReportView: React.FC<OpnameReportViewProps> = ({ report, stor
             {report.assetChanges.length > 0 &&
                 <div className="responsive-table-wrapper">
                     <table style={styles.table}>
-                        <thead><tr><th style={styles.th}>Nama Aset</th><th style={styles.th}>Kondisi Awal</th><th style={styles.th}>Kondisi Baru</th></tr></thead>
+                        <thead><tr><th style={styles.th}>Aset</th><th style={styles.th}>Kondisi Awal</th><th style={styles.th}>Kondisi Baru</th></tr></thead>
                         <tbody>{report.assetChanges.map(change => (<tr key={change.assetId}><td style={styles.td}>{change.assetName}</td><td style={styles.td}>{change.oldCondition}</td><td style={styles.td}><span style={{fontWeight: 'bold', color: change.newCondition === 'Rusak' ? 'var(--danger-color)' : 'inherit'}}>{change.newCondition}</span></td></tr>))}</tbody>
                     </table>
                 </div>

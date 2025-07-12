@@ -72,8 +72,8 @@ export const StockOpnameView: React.FC<StockOpnameViewProps> = ({ store, onStore
     })).sort((a,b) => a.name.localeCompare(b.name)), [store]);
     
     const handleExportForOpnameExcel = useCallback(() => {
-        const itemsToExport = itemsWithDetails.map(item => ({ 'Nama Barang': item.name, 'Satuan': item.sellingUnitName, 'Stok Awal': item.recordedStock, 'Stok Terkini (Isi di sini)': '', 'Selisih': '' }));
-        const assetsToExport = store.assets.map(asset => ({ 'Nama Aset': asset.name, 'Kondisi (Isi: Bagus/Normal/Rusak)': '' }));
+        const itemsToExport = itemsWithDetails.map(item => ({ 'Nama': item.name, 'Satuan': item.sellingUnitName, 'Stok Awal': item.recordedStock, 'Stok Terkini (Isi di sini)': '', 'Selisih': '' }));
+        const assetsToExport = store.assets.map(asset => ({ 'Aset': asset.name, 'Kondisi (Isi: Bagus/Normal/Rusak)': '' }));
         
         const sheetRequests: SheetRequest[] = [
             { sheetName: "Pemeriksaan Barang", data: itemsToExport },
@@ -137,14 +137,14 @@ export const StockOpnameView: React.FC<StockOpnameViewProps> = ({ store, onStore
             <h3 style={{ marginTop: 0, marginBottom: '16px', fontSize: '1.25rem' }}>Pemeriksaan Barang</h3>
             <div className="responsive-table-wrapper">
                 <table style={styles.table}>
-                    <thead><tr><th style={styles.th}>Nama Barang</th><th style={styles.th}>STOK AWAL</th><th style={styles.th}>STOK TERKINI</th><th style={styles.th}>Selisih</th><th style={styles.th}>Satuan</th></tr></thead>
+                    <thead><tr><th style={styles.th}>Nama</th><th style={styles.th}>STOK AWAL</th><th style={styles.th}>STOK TERKINI</th><th style={styles.th}>Selisih</th><th style={styles.th}>Satuan</th></tr></thead>
                     <tbody>{itemsWithDetails.map(item => (<tr key={item.id}><td style={styles.td}>{item.name}</td><td style={styles.td}>{item.recordedStock}</td><td style={styles.td}><input type="number" style={{...styles.input, ...styles.opnameInput}} className="opname-input-style" value={opnameData[item.id] ?? ''} onChange={e => handleCountChange(item.id, e.target.value)} min="0" /></td><td style={styles.td}></td><td style={styles.td}>{item.sellingUnitName}</td></tr>))}</tbody>
                 </table>
             </div>
             <h3 style={{ marginTop: '32px', marginBottom: '16px', fontSize: '1.25rem' }}>Pemeriksaan Aset</h3>
             <div className="responsive-table-wrapper">
                 <table style={styles.table}>
-                    <thead><tr><th style={styles.th}>Nama Aset</th><th style={styles.th}>Kondisi Awal</th><th style={styles.th}>Kondisi Baru</th></tr></thead>
+                    <thead><tr><th style={styles.th}>Aset</th><th style={styles.th}>Kondisi Awal</th><th style={styles.th}>Kondisi Baru</th></tr></thead>
                     <tbody>{store.assets.sort((a,b) => a.name.localeCompare(b.name)).map(asset => (
                         <tr key={asset.id}>
                             <td style={styles.td}>{asset.name}</td>

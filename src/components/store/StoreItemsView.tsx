@@ -274,13 +274,15 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                         
                         {/* Row 1: Nama & Kategori */}
                         <div style={{gridColumn: 'span 8'}} className="responsive-form-grid">
-                            <label htmlFor="item-name" style={styles.formLabel}>Nama Barang *</label>
+                            <label htmlFor="item-name" style={styles.formLabel}>Nama *</label>
                             <input id="item-name" ref={firstInputRef} style={styles.input} type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required />
                         </div>
                         <div style={{gridColumn: 'span 4'}} className="responsive-form-grid">
-                            <div style={{...styles.inlineFlex, justifyContent: 'space-between', marginBottom: '8px'}}>
+                            <div style={{...styles.inlineFlex, justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px'}}>
                                 <label htmlFor="item-category" style={{...styles.formLabel, marginBottom: 0}}>Kategori *</label>
-                                <button type="button" onClick={() => setIsCategoryModalOpen(true)} style={{...styles.button, ...styles.buttonOutline, padding: '4px 10px', fontSize: '0.8rem'}}>Kelola</button>
+                                <button type="button" onClick={() => setIsCategoryModalOpen(true)} style={{ ...styles.button, ...styles.buttonOutline, ...styles.buttonIconSmall}} title="Tambah Kategori Baru">
+                                    <PlusIcon size={16}/>
+                                </button>
                             </div>
                             <select id="item-category" style={styles.select} value={formData.categoryId} onChange={e => setFormData({ ...formData, categoryId: e.target.value })} required>
                                 <option value="" disabled>Pilih Kategori</option>
@@ -290,9 +292,11 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
 
                         {/* Row 2: Satuan, Stok & Konversi - REBUILT LAYOUT */}
                         <div style={{gridColumn: 'span 3'}} className="responsive-form-grid">
-                             <div style={{...styles.inlineFlex, justifyContent: 'space-between', marginBottom: '8px'}}>
+                             <div style={{...styles.inlineFlex, justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px'}}>
                                 <label htmlFor="item-purchase-unit" style={{...styles.formLabel, marginBottom: 0}}>Satuan Beli *</label>
-                                <button type="button" onClick={() => setIsUnitModalOpen(true)} style={{...styles.button, ...styles.buttonOutline, padding: '4px 10px', fontSize: '0.8rem'}}>Kelola</button>
+                                <button type="button" onClick={() => setIsUnitModalOpen(true)} style={{ ...styles.button, ...styles.buttonOutline, ...styles.buttonIconSmall}} title="Tambah Satuan Baru">
+                                    <PlusIcon size={16}/>
+                                </button>
                             </div>
                             <select id="item-purchase-unit" style={styles.select} value={formData.purchaseUnitId} onChange={e => setFormData({ ...formData, purchaseUnitId: e.target.value, sellingUnitId: e.target.value, conversionRate: '1' })} required>
                                 <option value="" disabled>Pilih</option>
@@ -363,7 +367,7 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
         }
         <div className="responsive-table-wrapper">
             <table style={styles.table}>
-                <thead><tr><th style={styles.th}>SKU</th><th style={styles.th}>Nama Barang</th><th style={styles.th}>Kategori</th><th style={styles.th}>Stok Tercatat</th><th style={styles.th}>Harga Beli (Satuan Jual)</th><th style={styles.th}>Harga Jual</th><th style={styles.th}>Aksi</th></tr></thead>
+                <thead><tr><th style={styles.th}>SKU</th><th style={styles.th}>Nama</th><th style={styles.th}>Kategori</th><th style={styles.th}>Stok</th><th style={styles.th}>Harga Beli (Satuan Jual)</th><th style={styles.th}>Harga Jual</th><th style={styles.th}>Margin (%)</th><th style={styles.th}>Aksi</th></tr></thead>
                 <tbody>{itemsWithDetails.map(item => {
                     const menuItems = [
                         { label: 'Tambah Stok (Kulakan)', icon: <PlusIcon size={16} />, onClick: () => handleOpenRestockModal(item) },
@@ -371,14 +375,42 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                         { isSeparator: true },
                         { label: 'Hapus Barang', icon: <TrashIcon size={16} />, onClick: () => handleDeleteClick(item.id) },
                     ];
-                    return (<tr key={item.id}><td style={styles.td}>{item.sku}</td><td style={{...styles.td, whiteSpace: 'nowrap'}}>{item.name}</td><td style={styles.td}>{item.categoryName}</td><td style={styles.td}>{getStockDisplay(item.recordedStock, item.conversionRate, item.purchaseUnitName, item.sellingUnitName)}</td><td style={styles.td}>{formatCurrency(item.purchasePrice)}</td><td style={styles.td}>{formatCurrency(item.sellingPrice)}</td>
-                    <td style={styles.td}>
-                        <Dropdown 
-                            trigger={<button style={{...styles.button, ...styles.buttonOutline, ...styles.buttonIconSmall, borderColor: 'transparent', background: 'transparent'}} title="Opsi"><MoreVertIcon size={20} color="var(--text-secondary)" /></button>} 
-                            menuItems={menuItems} 
-                            menuPositionStyle={{minWidth: '220px'}}
-                        />
-                    </td>
+
+                    const purchasePrice = item.purchasePrice;
+                    const sellingPrice = item.sellingPrice;
+                    let percentageText = '-';
+                    let percentageColor = 'var(--text-secondary)';
+
+                    if (purchasePrice > 0) {
+                        const percentage = ((sellingPrice - purchasePrice) / purchasePrice) * 100;
+                        percentageText = `${percentage >= 0 ? '+' : ''}${percentage.toFixed(1)}%`;
+
+                        if (percentage > 0) {
+                            percentageColor = 'var(--success-color)';
+                        } else if (percentage < 0) {
+                            percentageColor = 'var(--danger-color)';
+                        } else {
+                            percentageColor = 'var(--text-primary)';
+                        }
+                    }
+
+                    return (<tr key={item.id}>
+                        <td style={styles.td}>{item.sku}</td>
+                        <td style={{...styles.td, whiteSpace: 'nowrap'}}>{item.name}</td>
+                        <td style={styles.td}>{item.categoryName}</td>
+                        <td style={styles.td}>{getStockDisplay(item.recordedStock, item.conversionRate, item.purchaseUnitName, item.sellingUnitName)}</td>
+                        <td style={styles.td}>{formatCurrency(item.purchasePrice)}</td>
+                        <td style={styles.td}>{formatCurrency(item.sellingPrice)}</td>
+                        <td style={{ ...styles.td, color: percentageColor, fontWeight: 'bold' }}>
+                            {percentageText}
+                        </td>
+                        <td style={styles.td}>
+                            <Dropdown 
+                                trigger={<button style={{...styles.button, ...styles.buttonOutline, ...styles.buttonIconSmall, borderColor: 'transparent', background: 'transparent'}} title="Opsi"><MoreVertIcon size={20} color="var(--text-secondary)" /></button>} 
+                                menuItems={menuItems} 
+                                menuPositionStyle={{minWidth: '220px'}}
+                            />
+                        </td>
                     </tr>);
                 })}</tbody>
             </table>

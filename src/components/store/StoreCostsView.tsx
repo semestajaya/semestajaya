@@ -19,13 +19,25 @@ export const StoreCostsView: React.FC<StoreCostsViewProps> = ({ store, onStoreUp
     const formRef = useRef<HTMLDivElement>(null);
     const firstInputRef = useRef<HTMLInputElement>(null);
     const showForm = isAdding || editingCost !== null;
+
+    const formatNumberWithDots = (value: string | number): string => {
+        if (value === null || value === undefined || value === '') return '';
+        const stringValue = String(value).replace(/\D/g, '');
+        if (stringValue === '') return '';
+        return new Intl.NumberFormat('id-ID').format(Number(stringValue));
+    };
+
+    const parseNumberWithDots = (value: string): string => {
+        return value.replace(/[^0-9]/g, '');
+    };
+    
     useEffect(() => { if (editingCost) { setFormData({ name: editingCost.name, amount: String(editingCost.amount), frequency: editingCost.frequency, description: editingCost.description || '' }); setIsAdding(false); } }, [editingCost]);
     useEffect(() => { if (showForm) { formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => firstInputRef.current?.focus(), 300); } }, [showForm]);
     const handleCancel = () => { setIsAdding(false); setEditingCost(null); setFormData(emptyForm); };
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault();
-        const amountNum = parseFloat(formData.amount);
-        if (!formData.name || isNaN(amountNum)) return alert('Nama dan Jumlah biaya harus diisi dengan benar.');
+        const amountNum = parseFloat(parseNumberWithDots(formData.amount));
+        if (!formData.name || isNaN(amountNum) || formData.amount === '') return alert('Nama dan Jumlah biaya harus diisi dengan benar.');
         const costData = { name: formData.name, amount: amountNum, frequency: formData.frequency, description: formData.description };
         let updatedStore = { ...store };
         if (editingCost) { updatedStore.costs = store.costs.map(c => c.id === editingCost.id ? { ...c, ...costData } : c); }
@@ -70,8 +82,19 @@ export const StoreCostsView: React.FC<StoreCostsViewProps> = ({ store, onStoreUp
                 <h3 style={{marginTop: 0, marginBottom: '20px', fontSize: '1.25rem'}}>{editingCost ? 'Edit Biaya' : 'Tambah Biaya Baru'}</h3>
                 <form onSubmit={handleSave}>
                     <div style={{display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px', alignItems: 'flex-end', marginBottom: '16px'}} className="responsive-form-grid">
-                        <div><label htmlFor="cost-name" style={styles.formLabel}>Nama Biaya</label><input id="cost-name" ref={firstInputRef} style={styles.input} type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })}/></div>
-                        <div><label htmlFor="cost-amount" style={styles.formLabel}>Jumlah (Rp)</label><input id="cost-amount" style={styles.input} type="number" value={formData.amount} onChange={e => setFormData({ ...formData, amount: e.target.value })}/></div>
+                        <div><label htmlFor="cost-name" style={styles.formLabel}>Biaya</label><input id="cost-name" ref={firstInputRef} style={styles.input} type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required/></div>
+                        <div>
+                            <label htmlFor="cost-amount" style={styles.formLabel}>Jumlah (Rp)</label>
+                            <input
+                                id="cost-amount"
+                                style={styles.input}
+                                type="text"
+                                value={formatNumberWithDots(formData.amount)}
+                                onChange={e => setFormData({ ...formData, amount: parseNumberWithDots(e.target.value) })}
+                                placeholder="Contoh: 500.000"
+                                required
+                            />
+                        </div>
                         <div><label htmlFor="cost-frequency" style={styles.formLabel}>Frekuensi</label><select id="cost-frequency" style={styles.select} value={formData.frequency} onChange={e => setFormData({ ...formData, frequency: e.target.value as OperationalCost['frequency'] })}><option value="harian">Harian</option><option value="mingguan">Mingguan</option><option value="bulanan">Bulanan</option><option value="tahunan">Tahunan</option></select></div>
                     </div>
                      <div style={{marginBottom: '24px'}}><label htmlFor="cost-description" style={styles.formLabel}>Keterangan</label><textarea id="cost-description" style={{...styles.input, height: '80px', resize: 'vertical'}} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} /></div>
@@ -81,7 +104,7 @@ export const StoreCostsView: React.FC<StoreCostsViewProps> = ({ store, onStoreUp
         }
         <div className="responsive-table-wrapper">
             <table style={styles.table}>
-                <thead><tr><th style={styles.th}>Nama Biaya</th><th style={styles.th}>Keterangan</th><th style={styles.th}>Frekuensi</th><th style={styles.th}>Jumlah</th><th style={styles.th}>Aksi</th></tr></thead>
+                <thead><tr><th style={styles.th}>Biaya</th><th style={styles.th}>Keterangan</th><th style={styles.th}>Frekuensi</th><th style={styles.th}>Jumlah</th><th style={styles.th}>Aksi</th></tr></thead>
                 <tbody>{filteredCosts.map(cost => {
                     const menuItems = [
                         { label: 'Edit Biaya', icon: <PencilIcon size={16} />, onClick: () => setEditingCost(cost) },
