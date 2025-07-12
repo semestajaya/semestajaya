@@ -83,8 +83,8 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
         const { name, categoryId, sellingUnitId, purchaseUnitId, conversionRate, totalPurchasePrice, sellingPrice, description, stockPurchaseUnitQty, stockSellingUnitQty } = formData;
         
         const rate = parseFloat(conversionRate) || 1;
-        const totalPP = parseFloat(totalPurchasePrice) || 0;
-        const sp = parseFloat(sellingPrice) || 0;
+        const totalPP = parseFloat(parseNumberWithDots(totalPurchasePrice)) || 0;
+        const sp = parseFloat(parseNumberWithDots(sellingPrice)) || 0;
 
         const purchaseQty = parseInt(stockPurchaseUnitQty, 10) || 0;
         const sellingQty = parseInt(stockSellingUnitQty, 10) || 0;
@@ -99,6 +99,8 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
         if (totalPP > 0 && purchaseQty > 0 && rate > 0) {
             const pricePerPurchaseUnit = totalPP / purchaseQty;
             calculatedPurchasePricePerSellingUnit = pricePerPurchaseUnit / rate;
+        } else if (editingItem) {
+             calculatedPurchasePricePerSellingUnit = editingItem.purchasePrice;
         }
         
         const itemData: Omit<Item, 'id' | 'sku'> = { name, categoryId, sellingUnitId, purchaseUnitId, conversionRate: rate, purchasePrice: calculatedPurchasePricePerSellingUnit, sellingPrice: sp, description };
@@ -218,18 +220,19 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
     };
 
     const purchasePricePerSellingUnit = useMemo(() => {
-        const totalPrice = parseFloat(formData.totalPurchasePrice) || 0;
+        const totalPrice = parseFloat(parseNumberWithDots(formData.totalPurchasePrice)) || 0;
         const stockQty = parseInt(formData.stockPurchaseUnitQty, 10);
         const rate = parseFloat(formData.conversionRate) || 1;
         
         if (!totalPrice || !stockQty || stockQty <= 0 || !rate || rate <= 0) {
+            if (editingItem) return editingItem.purchasePrice;
             return 0;
         }
         
         const pricePerPurchaseUnit = totalPrice / stockQty;
         return pricePerPurchaseUnit / rate;
 
-    }, [formData.totalPurchasePrice, formData.stockPurchaseUnitQty, formData.conversionRate]);
+    }, [formData.totalPurchasePrice, formData.stockPurchaseUnitQty, formData.conversionRate, editingItem]);
 
 
     return <>
@@ -272,13 +275,13 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                 <form onSubmit={handleSave}>
                     <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 24px'}} className="responsive-form-grid">
                         
-                        {/* Row 1: Nama (Full width) */}
-                        <div style={{gridColumn: 'span 2'}}>
+                        {/* Nama */}
+                        <div style={{gridColumn: '1 / -1'}}>
                             <label htmlFor="item-name" style={styles.formLabel}>Nama *</label>
                             <input id="item-name" ref={firstInputRef} style={styles.input} type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required />
                         </div>
                         
-                        {/* Row 2: Kategori & Satuan Beli */}
+                        {/* Kategori */}
                         <div>
                             <div style={{...styles.inlineFlex, justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px'}}>
                                 <label htmlFor="item-category" style={{...styles.formLabel, marginBottom: 0}}>Kategori *</label>
@@ -291,6 +294,7 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                                 {store.itemCategories.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
                             </select>
                         </div>
+                        {/* Satuan Beli */}
                         <div>
                              <div style={{...styles.inlineFlex, justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px'}}>
                                 <label htmlFor="item-purchase-unit" style={{...styles.formLabel, marginBottom: 0}}>Satuan Beli *</label>
@@ -304,21 +308,23 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                             </select>
                         </div>
 
-                        {/* Row 3: Stok & Konversi */}
+                        {/* Jumlah (Satuan Beli) */}
                         <div>
                            <label htmlFor="item-stock-purchase-unit" style={styles.formLabel}>Jumlah (Satuan Beli)</label>
                            <input id="item-stock-purchase-unit" aria-label="Jumlah stok dalam satuan beli" style={styles.input} type="number" min="0" value={formData.stockPurchaseUnitQty} onChange={e => setFormData({...formData, stockPurchaseUnitQty: e.target.value})} />
                         </div>
+                        {/* Isi Konversi */}
                         <div>
                             <label htmlFor="item-conversion" style={styles.formLabel}>Isi Konversi</label>
                             <input id="item-conversion" style={styles.input} type="number" value={formData.conversionRate} onChange={e => setFormData({ ...formData, conversionRate: e.target.value })} min="1" />
                         </div>
                         
-                        {/* Row 4: Sisa Stok & Satuan Jual */}
+                        {/* Sisa (Satuan Jual) */}
                         <div>
                            <label htmlFor="item-stock-selling-unit" style={styles.formLabel}>Sisa (Satuan Jual)</label>
                            <input id="item-stock-selling-unit" aria-label="Jumlah sisa stok dalam satuan jual" style={styles.input} type="number" min="0" value={formData.stockSellingUnitQty} onChange={e => setFormData({...formData, stockSellingUnitQty: e.target.value})} />
                         </div>
+                         {/* Satuan Jual */}
                          <div>
                             <label htmlFor="item-selling-unit" style={styles.formLabel}>Satuan Jual *</label>
                              <select id="item-selling-unit" style={styles.select} value={formData.sellingUnitId} onChange={e => setFormData({ ...formData, sellingUnitId: e.target.value })} required>
@@ -327,35 +333,37 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                              </select>
                         </div>
                         
-                        {/* Row 5: Harga Beli */}
+                        {/* Total Harga Beli */}
                         <div>
-                            <label htmlFor="item-purchase-price-pu" style={styles.formLabel}>Total Harga Beli (utk Jml Satuan Beli)</label>
+                            <label htmlFor="item-purchase-price-pu" style={styles.formLabel}>Total Harga Beli (utk Jml Beli)</label>
                             <input
                                 id="item-purchase-price-pu"
                                 style={styles.input}
                                 type="text"
                                 placeholder="Contoh: 9.000.000"
                                 value={formatNumberWithDots(formData.totalPurchasePrice)}
-                                onChange={e => setFormData({ ...formData, totalPurchasePrice: parseNumberWithDots(e.target.value) })}
+                                onChange={e => setFormData({ ...formData, totalPurchasePrice: e.target.value })}
                             />
                         </div>
+                        {/* Hrg. Beli / Satuan Jual */}
                         <div>
-                            <label htmlFor="item-purchase-price-su" style={styles.formLabel}>Hrg. Beli / Satuan Jual (Otomatis)</label>
+                            <label htmlFor="item-purchase-price-su" style={styles.formLabel}>Hrg. Beli/Jual (Otomatis)</label>
                             <input id="item-purchase-price-su" style={{...styles.input, backgroundColor: '#f9fafb'}} type="text" value={formatCurrency(purchasePricePerSellingUnit)} readOnly />
                         </div>
 
-                        {/* Row 6: Harga Jual & Keterangan */}
+                        {/* Harga Jual */}
                         <div>
                             <label htmlFor="item-selling-price" style={styles.formLabel}>Harga Jual / Satuan Jual</label>
                             <input
                                 id="item-selling-price"
                                 style={styles.input}
                                 type="text"
-                                placeholder="Contoh: 3.500.000"
+                                placeholder="Contoh: 3.500"
                                 value={formatNumberWithDots(formData.sellingPrice)}
-                                onChange={e => setFormData({ ...formData, sellingPrice: parseNumberWithDots(e.target.value) })}
+                                onChange={e => setFormData({ ...formData, sellingPrice: e.target.value })}
                             />
                         </div>
+                        {/* Keterangan */}
                         <div>
                             <label htmlFor="item-description" style={styles.formLabel}>Keterangan</label>
                             <textarea id="item-description" style={{...styles.input, height: '42px', resize: 'vertical'}} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
@@ -363,8 +371,8 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                     </div>
 
                     <div style={{display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px'}} className="modal-footer-style">
-                        <button type="submit" style={{...styles.button, ...styles.buttonPrimary}}>{editingItem ? 'Simpan Perubahan' : 'Tambah Barang'}</button>
                         <button type="button" onClick={handleCancel} style={{ ...styles.button, ...styles.buttonOutline }}>Batal</button>
+                        <button type="submit" style={{...styles.button, ...styles.buttonPrimary}}>{editingItem ? 'Simpan Perubahan' : 'Tambah Barang'}</button>
                     </div>
                 </form>
             </div>
