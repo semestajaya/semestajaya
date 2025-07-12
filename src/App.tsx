@@ -18,12 +18,15 @@ export const App = () => {
             if (saved) {
                 const parsedStores = JSON.parse(saved);
                 if (Array.isArray(parsedStores) && parsedStores.length > 0) {
-                    // Ensure all stores have the new cash flow fields for backward compatibility
+                    // Ensure all stores have the new fields for backward compatibility
                     return parsedStores.map(store => ({
-                        cashFlow: [],
-                        capitalRecouped: 0,
-                        netProfit: 0,
-                        ...store,
+                        ...{ // Default values for potentially missing fields
+                            investors: [],
+                            cashFlow: [],
+                            capitalRecouped: 0,
+                            netProfit: 0,
+                        },
+                        ...store, // Saved values will override defaults
                     }));
                 }
             }

@@ -1,15 +1,15 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { Store, CashFlowEntry } from '../../types/data';
+import { Store, CashFlowEntry, Investor } from '../../types/data';
 import { styles } from '../../styles';
 import { ConfirmModal } from '../common/Modals';
-import { TrashIcon, WalletIcon, LandmarkIcon } from '../common/Icons';
+import { TrashIcon, WalletIcon, LandmarkIcon, AlertTriangleIcon } from '../common/Icons';
 
 interface CashFlowViewProps { store: Store; onStoreUpdate: (store: Store) => void; }
 const generateId = (prefix: string) => `${prefix}${Date.now()}${Math.random().toString(36).substring(2, 6)}`;
 
 const InfoCard: React.FC<{ label: string; value: string; subvalue?: string; color?: string; icon?: React.ReactNode;}> = ({ label, value, subvalue, color = 'var(--text-primary)', icon }) => (
-    <div style={{flex: 1, padding: '16px', backgroundColor: '#f9fafb', borderRadius: 'var(--radius-md)', borderLeft: icon ? 'none' : `4px solid ${color}`, display: 'flex', gap: '16px', alignItems: 'center'}}>
+    <div style={{flex: 1, padding: '16px', backgroundColor: '#f9fafb', borderRadius: 'var(--radius-md)', borderLeft: icon ? 'none' : `4px solid ${color}`, display: 'flex', gap: '16px', alignItems: 'center', minWidth: '200px'}}>
         {icon && <div style={{ color }}>{icon}</div>}
         <div>
             <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>{label}</p>
@@ -32,22 +32,23 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
     const formatNumberWithDots = (value: string | number) => String(value).replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     const parseNumberWithDots = (value: string) => value.replace(/\./g, '');
 
-    const handleRecalculateCapitalAndProfit = useCallback((updatedCashFlow: CashFlowEntry[]) => {
+    const handleRecalculateCapitalAndProfit = useCallback((updatedCashFlow: CashFlowEntry[], currentStore: Store) => {
         const sortedFlow = updatedCashFlow.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         
-        // Monthly deduction is based on annual costs, divided by 12.
-        const monthlyCosts = store.costs
+        const monthlyCosts = currentStore.costs
             .filter(c => c.frequency === 'tahunan')
             .reduce((sum, c) => sum + c.amount, 0) / 12;
 
-        // Initial Capital is stock value + asset value + one-time costs (annual and 'sekali').
-        const oneTimeCostsForCapital = store.costs
+        const oneTimeCostsForCapital = currentStore.costs
             .filter(c => c.frequency === 'tahunan' || c.frequency === 'sekali')
             .reduce((sum, c) => sum + c.amount, 0);
 
-        const initialStockValue = store.items.reduce((acc, item) => acc + (item.purchasePrice * (store.inventory.find(inv => inv.itemId === item.id)?.recordedStock || 0)), 0);
-        const initialAssetValue = store.assets.reduce((acc, asset) => acc + asset.value, 0);
+        const initialStockValue = currentStore.items.reduce((acc, item) => acc + (item.purchasePrice * (currentStore.inventory.find(inv => inv.itemId === item.id)?.recordedStock || 0)), 0);
+        const initialAssetValue = currentStore.assets.reduce((acc, asset) => acc + asset.value, 0);
         const initialCapital = initialStockValue + initialAssetValue + oneTimeCostsForCapital;
+
+        const totalInvestorShare = currentStore.investors.reduce((sum, inv) => sum + inv.sharePercentage, 0);
+        const ownerSharePercentage = Math.max(0, 100 - totalInvestorShare) / 100;
 
         const incomeByMonth: { [key: string]: number } = {};
         sortedFlow.forEach(entry => {
@@ -63,7 +64,7 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
         for (const monthKey of sortedMonths) {
             const monthlyIncome = incomeByMonth[monthKey];
             const grossProfit = monthlyIncome - monthlyCosts;
-            const myShare = grossProfit > 0 ? grossProfit / 2 : 0;
+            const myShare = grossProfit > 0 ? grossProfit * ownerSharePercentage : 0;
             
             if (cumulativeCapitalRecouped < initialCapital) {
                 const neededToRecoup = initialCapital - cumulativeCapitalRecouped;
@@ -77,7 +78,7 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
             }
         }
         return { capitalRecouped: cumulativeCapitalRecouped, netProfit: cumulativeNetProfit };
-    }, [store.costs, store.items, store.assets, store.inventory]);
+    }, []);
 
     const handleAddIncome = (e: React.FormEvent) => {
         e.preventDefault();
@@ -88,7 +89,7 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
         }
         const newEntry: CashFlowEntry = { id: generateId('CF'), ...formData, amount };
         const updatedCashFlow = [...store.cashFlow, newEntry];
-        const { capitalRecouped, netProfit } = handleRecalculateCapitalAndProfit(updatedCashFlow);
+        const { capitalRecouped, netProfit } = handleRecalculateCapitalAndProfit(updatedCashFlow, store);
         
         onStoreUpdate({ ...store, cashFlow: updatedCashFlow, capitalRecouped, netProfit });
         setFormData(emptyForm);
@@ -97,13 +98,13 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
     const handleDeleteIncome = () => {
         if (!deletingEntry) return;
         const updatedCashFlow = store.cashFlow.filter(entry => entry.id !== deletingEntry.id);
-        const { capitalRecouped, netProfit } = handleRecalculateCapitalAndProfit(updatedCashFlow);
+        const { capitalRecouped, netProfit } = handleRecalculateCapitalAndProfit(updatedCashFlow, store);
 
         onStoreUpdate({ ...store, cashFlow: updatedCashFlow, capitalRecouped, netProfit });
         setDeletingEntry(null);
     };
 
-    const { monthlyReport, capitalReport } = useMemo(() => {
+    const { monthlyReport, capitalReport, shareReport } = useMemo(() => {
         const monthStr = String(selectedMonth + 1).padStart(2, '0');
         const monthKey = `${selectedYear}-${monthStr}`;
 
@@ -113,10 +114,16 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
         
         const totalAnnualCostForReport = store.costs.filter(c => c.frequency === 'tahunan').reduce((sum, c) => sum + c.amount, 0);
         const monthlyOperationalCost = totalAnnualCostForReport / 12;
-
         const grossProfit = totalMonthlyIncome - monthlyOperationalCost;
-        const ownerShare = grossProfit > 0 ? grossProfit / 2 : 0;
-        const investorShare = grossProfit > 0 ? grossProfit / 2 : 0;
+
+        const totalInvestorShare = store.investors.reduce((sum, inv) => sum + inv.sharePercentage, 0);
+        const ownerSharePercentage = Math.max(0, 100 - totalInvestorShare);
+        
+        const ownerShareAmount = grossProfit > 0 ? grossProfit * (ownerSharePercentage / 100) : 0;
+        const investorShares = store.investors.map(inv => ({
+            ...inv,
+            shareAmount: grossProfit > 0 ? grossProfit * (inv.sharePercentage / 100) : 0,
+        }));
 
         const totalStockValue = store.inventory.reduce((acc, inv) => {
             const item = store.items.find(i => i.id === inv.itemId);
@@ -124,7 +131,6 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
         }, 0);
         const totalAssetValue = store.assets.reduce((acc, asset) => acc + asset.value, 0);
 
-        // Initial capital is stock + assets + one-time costs (annual and 'sekali').
         const oneTimeCostsForCapital = store.costs
             .filter(c => c.frequency === 'tahunan' || c.frequency === 'sekali')
             .reduce((sum, c) => sum + c.amount, 0);
@@ -133,8 +139,9 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
         const remainingCapital = Math.max(0, initialCapital - store.capitalRecouped);
 
         return {
-            monthlyReport: { totalMonthlyIncome, monthlyOperationalCost, grossProfit, ownerShare, investorShare },
-            capitalReport: { initialCapital, remainingCapital }
+            monthlyReport: { totalMonthlyIncome, monthlyOperationalCost, grossProfit },
+            capitalReport: { initialCapital, remainingCapital },
+            shareReport: { ownerSharePercentage, ownerShareAmount, investorShares, totalInvestorShare }
         };
     }, [store, selectedMonth, selectedYear]);
 
@@ -180,9 +187,25 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
                 <InfoCard label="Total Pemasukan" value={formatCurrency(monthlyReport.totalMonthlyIncome)} color="var(--success-color)" />
                 <InfoCard label="Biaya Tahunan (/12)" value={formatCurrency(monthlyReport.monthlyOperationalCost)} color="var(--danger-color)" />
                 <InfoCard label="Laba Kotor" value={formatCurrency(monthlyReport.grossProfit)} color="var(--primary-color)" />
-                <InfoCard label="Bagian Saya (50%)" value={formatCurrency(monthlyReport.ownerShare)} />
-                <InfoCard label="Bagian Investor (50%)" value={formatCurrency(monthlyReport.investorShare)} />
             </div>
+
+            {/* Share Distribution */}
+            <div style={{display: 'flex', flexDirection: 'column', gap: '16px', borderTop: '1px solid var(--border-color)', paddingTop: '24px', marginBottom: '24px'}}>
+                 <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Pembagian Hasil Bulan Ini</h4>
+                 {shareReport.totalInvestorShare > 100 && (
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--danger-color)', padding: '12px', backgroundColor: 'rgba(239, 68, 68, 0.05)', borderRadius: 'var(--radius-md)'}}>
+                         <AlertTriangleIcon size={18} />
+                         <span style={{fontWeight: 600}}>Peringatan: Total saham investor ({shareReport.totalInvestorShare}%) melebihi 100%.</span>
+                     </div>
+                 )}
+                <div style={{display: 'flex', gap: '16px', flexWrap: 'wrap'}}>
+                    <InfoCard label={`Bagian Pemilik (${shareReport.ownerSharePercentage.toFixed(1)}%)`} value={formatCurrency(shareReport.ownerShareAmount)} />
+                    {shareReport.investorShares.map(inv => (
+                        <InfoCard key={inv.id} label={`Bagian ${inv.name} (${inv.sharePercentage}%)`} value={formatCurrency(inv.shareAmount)} />
+                    ))}
+                </div>
+            </div>
+
              {/* Capital Status Report Cards */}
             <div style={{display: 'flex', gap: '16px', flexWrap: 'wrap', padding: '16px', backgroundColor: '#fdfdfd', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)'}}>
                  <InfoCard icon={<LandmarkIcon size={24}/>} label="Modal Awal" value={formatCurrency(capitalReport.initialCapital)} color="#4f46e5" />

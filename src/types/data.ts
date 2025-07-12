@@ -39,6 +39,12 @@ export interface OperationalCost {
     description: string;
 }
 
+export interface Investor {
+  id: string;
+  name: string;
+  sharePercentage: number;
+}
+
 export interface CashFlowEntry {
   id: string;
   date: string; // YYYY-MM-DD
@@ -57,6 +63,7 @@ export interface Store {
   inventory: StoreInventory[];
   assets: Asset[];
   costs: OperationalCost[];
+  investors: Investor[];
   cashFlow: CashFlowEntry[];
   capitalRecouped: number;
   netProfit: number;

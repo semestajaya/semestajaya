@@ -7,6 +7,7 @@ import { InfoModal } from '../common/Modals';
 import { StoreItemsView } from '../store/StoreItemsView';
 import { StoreAssetsView } from '../store/StoreAssetsView';
 import { StoreCostsView } from '../store/StoreCostsView';
+import { StoreInvestorsView } from '../store/StoreInvestorsView';
 import { StoreSummaryView } from './StoreSummaryView';
 import { CashFlowView } from './CashFlowView';
 import { MoreVertIcon, PlayIcon, ImportIcon, ExportIcon } from '../common/Icons';
@@ -69,6 +70,12 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({ store, onStore
                     'Biaya': c.name, 'Keterangan': c.description, 'Jumlah': c.amount, 'Frekuensi': c.frequency
                 }))
             },
+            investors: {
+                name: "Investor",
+                data: store.investors.map(inv => ({
+                    'Nama': inv.name, 'Persentase Saham (%)': inv.sharePercentage
+                }))
+            },
             cashflow: {
                  name: "Arus Kas",
                  data: store.cashFlow.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(cf => ({
@@ -79,7 +86,7 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({ store, onStore
 
         if (type === 'all') {
             (Object.keys(sheetDataMap) as Array<keyof typeof sheetDataMap>).forEach(key => {
-                 if (key !== 'cashflow' || (key === 'cashflow' && store.cashFlow.length > 0)) {
+                 if (sheetDataMap[key].data.length > 0) {
                     sheetRequests.push({ sheetName: sheetDataMap[key].name, data: sheetDataMap[key].data });
                  }
             });
@@ -186,8 +193,8 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({ store, onStore
                     workbook.eachSheet(worksheet => processSheet(worksheet));
                 } 
                 else { 
-                    const sheetMap = { items: 'barang', assets: 'aset', costs: 'biaya' }; 
-                    const targetSheetName = sheetMap[activeTab as keyof typeof sheetMap]; 
+                    const sheetMap: { [key: string]: string } = { items: 'barang', assets: 'aset', costs: 'biaya', investors: 'investor' }; 
+                    const targetSheetName = sheetMap[activeTab]; 
                     const foundSheet = workbook.worksheets.find(ws => ws.name.toLowerCase().includes(targetSheetName));
                     if(foundSheet) processSheet(foundSheet);
                 }
@@ -209,6 +216,7 @@ export const StoreDetailView: React.FC<StoreDetailViewProps> = ({ store, onStore
         items: { label: "Master Barang", component: <StoreItemsView store={store} onStoreUpdate={onStoreUpdate} /> }, 
         assets: { label: "Master Aset", component: <StoreAssetsView store={store} onStoreUpdate={onStoreUpdate} /> }, 
         costs: { label: "Master Biaya", component: <StoreCostsView store={store} onStoreUpdate={onStoreUpdate} /> }, 
+        investors: { label: "Master Investor", component: <StoreInvestorsView store={store} onStoreUpdate={onStoreUpdate} /> },
         cashflow: { label: "Arus Kas", component: <CashFlowView store={store} onStoreUpdate={onStoreUpdate} /> },
     };
 
