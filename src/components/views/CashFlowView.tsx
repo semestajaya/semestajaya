@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { Store, CashFlowEntry, Investor } from '../../types/data';
+import { Store, CashFlowEntry } from '../../types/data';
 import { styles } from '../../styles';
 import { ConfirmModal } from '../common/Modals';
 import { TrashIcon, WalletIcon, LandmarkIcon, AlertTriangleIcon } from '../common/Icons';
