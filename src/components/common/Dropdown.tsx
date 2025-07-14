@@ -51,10 +51,11 @@ export const Dropdown: React.FC<DropdownProps> = ({ trigger, menuItems, menuPosi
                         }
                         return (
                         <li key={index}>
-                            <button onClick={() => { if(item.onClick) item.onClick(); setIsOpen(false); }}
+                            <button 
+                              onClick={() => { if(item.onClick) item.onClick(); setIsOpen(false); }}
+                              className="dropdown-item"
                               style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '10px 16px', textAlign: 'left', background: 'transparent',
-                                border: 'none', cursor: 'pointer', fontSize: '0.95rem', color: 'var(--text-primary)', }}
-                              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                border: 'none', cursor: 'pointer', fontSize: '0.95rem', color: 'var(--text-primary)', transition: 'background-color 0.2s' }}
                             >
                                 {item.icon && <span style={{ marginRight: '12px', display: 'flex', alignItems: 'center' }}>{item.icon}</span>}
                                 {item.label}

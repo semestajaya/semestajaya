@@ -348,7 +348,7 @@ export const StoreItemsView: React.FC<StoreItemsViewProps> = ({ store, onStoreUp
                         {/* Harga /Qty */}
                         <div>
                             <label htmlFor="item-purchase-price-su" style={styles.formLabel}>Harga /Qty</label>
-                            <input id="item-purchase-price-su" style={{...styles.input, backgroundColor: '#f9fafb'}} type="text" value={formatCurrency(purchasePricePerSellingUnit)} readOnly />
+                            <input id="item-purchase-price-su" style={{...styles.input, backgroundColor: 'var(--bg-header)'}} type="text" value={formatCurrency(purchasePricePerSellingUnit)} readOnly />
                         </div>
 
                         {/* Harga Jual /Qty */}

@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo, useCallback } from 'react';
 import { Store, CashFlowEntry } from '../../types/data';
 import { styles } from '../../styles';
@@ -9,7 +10,7 @@ interface CashFlowViewProps { store: Store; onStoreUpdate: (store: Store) => voi
 const generateId = (prefix: string) => `${prefix}${Date.now()}${Math.random().toString(36).substring(2, 6)}`;
 
 const InfoCard: React.FC<{ label: string; value: string; subvalue?: string; color?: string; icon?: React.ReactNode;}> = ({ label, value, subvalue, color = 'var(--text-primary)', icon }) => (
-    <div style={{flex: 1, padding: '16px', backgroundColor: '#f9fafb', borderRadius: 'var(--radius-md)', borderLeft: icon ? 'none' : `4px solid ${color}`, display: 'flex', gap: '16px', alignItems: 'center', minWidth: '200px'}}>
+    <div style={{flex: 1, padding: '16px', backgroundColor: 'var(--bg-header)', borderRadius: 'var(--radius-md)', borderLeft: icon ? 'none' : `4px solid ${color}`, display: 'flex', gap: '16px', alignItems: 'center', minWidth: '200px'}}>
         {icon && <div style={{ color }}>{icon}</div>}
         <div>
             <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>{label}</p>
@@ -219,7 +220,7 @@ export const CashFlowView: React.FC<CashFlowViewProps> = ({ store, onStoreUpdate
             </div>
 
              {/* Capital Status Report Cards */}
-            <div style={{display: 'flex', gap: '16px', flexWrap: 'wrap', padding: '16px', backgroundColor: '#fdfdfd', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)'}}>
+            <div style={{display: 'flex', gap: '16px', flexWrap: 'wrap', padding: '16px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)'}}>
                  <InfoCard icon={<LandmarkIcon size={24}/>} label="Modal Awal" value={formatCurrency(capitalReport.initialCapital)} color="#4f46e5" />
                  <InfoCard icon={<WalletIcon size={24}/>} label="Modal Tertutupi" value={formatCurrency(store.capitalRecouped)} color="#10b981" />
                  <InfoCard icon={<WalletIcon size={24}/>} label="Sisa Modal" value={formatCurrency(capitalReport.remainingCapital)} color="#d97706"/>

@@ -1,5 +1,6 @@
 
 
+
 import React, { useMemo, useCallback, useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -118,7 +119,7 @@ export const OpnameReportView: React.FC<OpnameReportViewProps> = ({ report, stor
                 <p style={{margin: '4px 0 0 0', color: 'var(--text-secondary)'}}>Tanggal Opname: {new Date(report.date).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}</p>
             </div>
             <h4 style={{ fontSize: '1.1rem', marginTop: '24px', marginBottom: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>Hasil Pemeriksaan Barang</h4>
-            <div style={{display: 'flex', gap: '16px', marginBottom: '16px', padding: '20px', backgroundColor: '#f9fafb', borderRadius: 'var(--radius-md)' }} className="summary-flex">
+            <div style={{display: 'flex', gap: '16px', marginBottom: '16px', padding: '20px', backgroundColor: 'var(--bg-header)', borderRadius: 'var(--radius-md)' }} className="summary-flex">
                 <div style={{flex: 1}}><strong>Total Barang:</strong> {itemSummary.total}</div>
                 <div style={{flex: 1, fontWeight: 'bold'}}><strong>Sesuai:</strong> {itemSummary.match}</div>
                 <div style={{flex: 1, ...styles.discrepancyPositive}}><strong>Lebih:</strong> {itemSummary.surplus}</div>
@@ -131,7 +132,7 @@ export const OpnameReportView: React.FC<OpnameReportViewProps> = ({ report, stor
                 </table>
             </div>
             <h4 style={{ fontSize: '1.1rem', marginTop: '32px', marginBottom: '16px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>Hasil Pemeriksaan Aset</h4>
-            <div style={{display: 'flex', gap: '16px', marginBottom: '16px', padding: '20px', backgroundColor: '#f9fafb', borderRadius: 'var(--radius-md)' }} className="summary-flex">
+            <div style={{display: 'flex', gap: '16px', marginBottom: '16px', padding: '20px', backgroundColor: 'var(--bg-header)', borderRadius: 'var(--radius-md)' }} className="summary-flex">
                 <div style={{flex: 1}}><strong>Total Aset Dicek:</strong> {assetSummary.totalChecked}</div>
                 <div style={{flex: 1}}><strong>Kondisi Berubah:</strong> {assetSummary.changed}</div>
                 <div style={{flex: 1, ...styles.discrepancyNegative}}><strong>Menjadi Rusak:</strong> {assetSummary.becameRusak}</div>

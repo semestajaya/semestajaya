@@ -69,11 +69,11 @@ export const StoreInvestorsView: React.FC<StoreInvestorsViewProps> = ({ store, o
         </div>
 
         {totalShare > 100 && (
-             <div style={{...styles.card, display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: '#fffbe6', borderColor: '#facc15', borderLeftWidth: '4px', marginBottom: '16px'}}>
-                <AlertTriangleIcon color="#f59e0b" size={24} />
+             <div style={{...styles.card, display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: 'var(--warning-bg)', borderColor: 'var(--warning-border)', borderLeftWidth: '4px', marginBottom: '16px'}}>
+                <AlertTriangleIcon color="var(--warning-icon)" size={24} />
                 <div>
-                    <h4 style={{margin: 0, color: '#b45309' }}>Peringatan: Total Saham Melebihi Batas</h4>
-                    <p style={{margin: '4px 0 0 0', color: '#d97706'}}>Total persentase saham saat ini adalah {totalShare}%, melebihi 100%. Mohon perbaiki data investor.</p>
+                    <h4 style={{margin: 0, color: 'var(--warning-text-header)' }}>Peringatan: Total Saham Melebihi Batas</h4>
+                    <p style={{margin: '4px 0 0 0', color: 'var(--warning-text-body)'}}>Total persentase saham saat ini adalah {totalShare}%, melebihi 100%. Mohon perbaiki data investor.</p>
                 </div>
             </div>
         )}
@@ -118,12 +118,12 @@ export const StoreInvestorsView: React.FC<StoreInvestorsViewProps> = ({ store, o
                     })}
                 </tbody>
                  <tfoot>
-                    <tr style={{backgroundColor: '#f9fafb'}}>
+                    <tr style={{backgroundColor: 'var(--bg-header)'}}>
                         <td style={{...styles.td, fontWeight: 'bold'}}>Total Saham Investor</td>
                         <td style={{...styles.td, fontWeight: 'bold'}}>{totalShare.toFixed(1)}%</td>
                         <td style={styles.td}></td>
                     </tr>
-                     <tr style={{backgroundColor: '#f9fafb'}}>
+                     <tr style={{backgroundColor: 'var(--bg-header)'}}>
                         <td style={{...styles.td, fontWeight: 'bold'}}>Sisa Saham Pemilik</td>
                         <td style={{...styles.td, fontWeight: 'bold'}}>{(100 - totalShare).toFixed(1)}%</td>
                         <td style={styles.td}></td>

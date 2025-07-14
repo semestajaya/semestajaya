@@ -1,5 +1,6 @@
 
 
+
 import React, { useMemo } from 'react';
 import { Store, OpnameSession, Item } from '../../types/data';
 import { styles } from '../../styles';
@@ -146,7 +147,7 @@ export const StoreSummaryView: React.FC<StoreSummaryViewProps> = ({ store, lates
                             </button>
                         </>
                     ) : (
-                        <div style={{ textAlign: 'center', padding: '20px', backgroundColor: '#f9fafb', borderRadius: 'var(--radius-md)'}}>
+                        <div style={{ textAlign: 'center', padding: '20px', backgroundColor: 'var(--bg-header)', borderRadius: 'var(--radius-md)'}}>
                             <CheckCircleIcon size={32} color="var(--text-secondary)" />
                             <p style={{margin: '12px 0 0 0', color: 'var(--text-secondary)'}}>Belum ada riwayat pengecekan. Mulai cek untuk melihat laporan di sini.</p>
                         </div>
@@ -168,7 +169,7 @@ export const StoreSummaryView: React.FC<StoreSummaryViewProps> = ({ store, lates
                             ))}
                         </ul>
                     ) : (
-                        <div style={{ textAlign: 'center', padding: '20px', backgroundColor: '#f9fafb', borderRadius: 'var(--radius-md)', flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                        <div style={{ textAlign: 'center', padding: '20px', backgroundColor: 'var(--bg-header)', borderRadius: 'var(--radius-md)', flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                            <CheckCircleIcon size={32} color="var(--success-color)" />
                            <p style={{margin: '12px 0 0 0', color: 'var(--text-secondary)'}}>Stok semua barang aman!</p>
                         </div>
@@ -188,7 +189,7 @@ export const StoreSummaryView: React.FC<StoreSummaryViewProps> = ({ store, lates
                             ))}
                         </div>
                      ) : (
-                        <div style={{ textAlign: 'center', padding: '20px', backgroundColor: '#f9fafb', borderRadius: 'var(--radius-md)', flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                        <div style={{ textAlign: 'center', padding: '20px', backgroundColor: 'var(--bg-header)', borderRadius: 'var(--radius-md)', flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                              <AlertTriangleIcon size={32} color="var(--text-secondary)" />
                             <p style={{margin: '12px 0 0 0', color: 'var(--text-secondary)'}}>Belum ada data aset yang ditambahkan.</p>
                         </div>

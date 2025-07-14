@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect, useMemo } from 'react';
 import { Store, OpnameSession } from './types/data';
 import { styles } from './styles';
@@ -7,9 +8,12 @@ import { StoreDetailView } from './components/views/StoreDetailView';
 import { StockOpnameView } from './components/views/StockOpnameView';
 import { OpnameReportView } from './components/views/OpnameReportView';
 import { defaultStores } from './data/defaultData';
+import { SunIcon, MoonIcon } from './components/common/Icons';
 
 const APP_STORAGE_KEY_STORES = 'manajemen-toko-app-stores';
 const APP_STORAGE_KEY_HISTORY = 'manajemen-toko-app-history';
+const APP_STORAGE_KEY_THEME = 'manajemen-toko-app-theme';
+
 
 export const App = () => {
     const [stores, setStores] = useState<Store[]>(() => {
@@ -40,9 +44,19 @@ export const App = () => {
     const [view, setView] = useState<'home' | 'store-detail' | 'opname' | 'report'>('home');
     const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
     const [activeReport, setActiveReport] = useState<OpnameSession | null>(null);
+    const [theme, setTheme] = useState(() => localStorage.getItem(APP_STORAGE_KEY_THEME) || 'light');
     
     useEffect(() => { try { localStorage.setItem(APP_STORAGE_KEY_STORES, JSON.stringify(stores)); } catch (e) { console.error(e); } }, [stores]);
     useEffect(() => { try { localStorage.setItem(APP_STORAGE_KEY_HISTORY, JSON.stringify(opnameHistory)); } catch (e) { console.error(e); } }, [opnameHistory]);
+    
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem(APP_STORAGE_KEY_THEME, theme);
+    }, [theme]);
+
+    const toggleTheme = () => {
+        setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+    };
 
     const selectedStore = useMemo(() => stores.find(s => s.id === selectedStoreId), [stores, selectedStoreId]);
 
@@ -86,6 +100,9 @@ export const App = () => {
         <div style={styles.app}>
             <header style={{...styles.appHeader}} className="responsive-header no-print">
                 <h1 style={styles.appTitle} className="app-title-style">Aplikasi Manajemen Toko</h1>
+                <button onClick={toggleTheme} style={{...styles.button, ...styles.buttonOutline, ...styles.buttonIcon}} title={`Ganti ke tema ${theme === 'light' ? 'gelap' : 'terang'}`}>
+                    {theme === 'light' ? <MoonIcon size={20}/> : <SunIcon size={20}/>}
+                </button>
             </header>
             <main style={styles.mainContent} className="responsive-padding">
                 {renderContent()}
